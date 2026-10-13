@@ -1,118 +1,198 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import logo from "../assets/logo.png";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { CalendarHeart } from "lucide-react";
+import LogoMark from "./LogoMark";
+import { useActiveSection } from "../lib/hooks";
+import { BOOKING_URL, NAV_LINKS } from "../lib/site";
+import { lockScroll, scrollToTarget } from "../lib/smoothScroll";
+
+const SPY_IDS = ["inicio", ...NAV_LINKS.map((link) => link.id)];
+
+const ease = [0.22, 1, 0.36, 1] as const;
 
 function Navbar() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
+  const active = useActiveSection(SPY_IDS, pathname);
 
-  const closeMenu = () => setIsOpen(false);
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (y) => setPastHero(y > window.innerHeight - 90));
+
+  useEffect(() => {
+    if (!isOpen) return;
+    lockScroll(true);
+    return () => lockScroll(false);
+  }, [isOpen]);
+
+  // Transparent and light while over the hero photo; a frosted bar everywhere else.
+  const overHero = pathname === "/" && !pastHero && !isOpen;
+
+  const goTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsOpen(false);
+    if (document.getElementById(id)) {
+      lockScroll(false);
+      scrollToTarget(`#${id}`);
+    } else {
+      navigate("/", { state: { scrollTo: `#${id}` } });
+    }
+  };
+
+  const goHome = (e: React.MouseEvent) => {
+    setIsOpen(false);
+    if (pathname === "/") {
+      e.preventDefault();
+      lockScroll(false);
+      scrollToTarget(0);
+    }
+  };
 
   return (
-    <nav className="w-full bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 h-28 flex items-center justify-between">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,color] duration-500 ${
+        overHero
+          ? "border-transparent bg-transparent text-sand"
+          : "border-sand/60 bg-white/80 text-espresso shadow-[0_10px_40px_-24px_rgba(80,49,29,0.4)] backdrop-blur-xl backdrop-saturate-150"
+      }`}
+    >
+      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-5 sm:px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-4" onClick={closeMenu}>
-          <img src={logo} alt="Logo" className="h-20 w-auto" />
-          <div className="flex flex-col items-start">
-            <span className="font-heading text-[#50311D] text-2xl font-normal">
+        <Link to="/" onClick={goHome} className="flex min-w-0 items-center gap-3">
+          <LogoMark className="h-11 w-11 shrink-0" strokeWidth={3} />
+          <span className="flex min-w-0 flex-col leading-none">
+            <span className="whitespace-nowrap text-[0.78rem] font-semibold tracking-[0.26em] sm:text-sm">
               FRANCISCA OLIVEIRA
             </span>
-            <span className="font-heading font-semibold text-[#50311D] text-md">
+            <span
+              className={`mt-1.5 text-[0.6rem] font-medium uppercase tracking-[0.34em] transition-colors duration-500 ${
+                overHero ? "text-sand/75" : "text-caramel"
+              }`}
+            >
               Psicóloga Clínica
             </span>
-          </div>
+          </span>
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex gap-8 items-center">
-          <a
-            href="#about-me"
-            className="text-[#50311D] hover:text-[#805C3B] transition-colors"
-          >
-            Sobre Mim
-          </a>
-          <a
-            href="#footer"
-            className="text-[#50311D] hover:text-[#805C3B] transition-colors"
-          >
-            Contactos
-          </a>
-          <a
-            href="https://docs.google.com/forms/d/1gelG6bb5q5cFLBGHRkJlcydtJFheVEpfUz_m81ljJjg/edit"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[#50311D] text-[#D4CABC] px-4 py-2 rounded-md font-semibold hover:bg-[#7A5C48] transition"
-          >
-            Agende uma sessão
-          </a>
-        </div>
+        {/* Desktop links — the pill follows the section in view */}
+        <ul className="hidden items-center gap-1 lg:flex">
+          {NAV_LINKS.map((link) => {
+            const current = active === link.id;
+            return (
+              <li key={link.id}>
+                <a
+                  href={`#${link.id}`}
+                  onClick={goTo(link.id)}
+                  aria-current={current ? "true" : undefined}
+                  className={`relative isolate block rounded-full px-4 py-2 text-sm font-medium transition-colors duration-300 ${
+                    overHero
+                      ? "text-sand/85 hover:text-white"
+                      : current
+                        ? "text-espresso"
+                        : "text-mocha hover:text-espresso"
+                  }`}
+                >
+                  {current && !overHero && (
+                    <motion.span
+                      layoutId="nav-pill"
+                      className="absolute inset-0 -z-10 rounded-full bg-linen"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+
+        <a
+          href={BOOKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`button-primary hidden px-6 py-3 lg:inline-flex ${
+            overHero ? "bg-sand text-espresso hover:bg-white hover:text-espresso" : ""
+          }`}
+        >
+          <CalendarHeart className="h-4 w-4" strokeWidth={1.75} />
+          Agende uma sessão
+        </a>
 
         {/* Mobile Menu Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden text-[#50311D] transition-transform duration-300"
+          className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors lg:hidden ${
+            overHero ? "border-sand/40 hover:bg-white/10" : "border-sand hover:bg-linen"
+          }`}
           aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={isOpen}
         >
-          <svg
-            className={`w-6 h-6 transition-transform duration-300 ${
-              isOpen ? "rotate-90" : "rotate-0"
+          <span
+            className={`absolute h-[1.5px] w-5 rounded-full bg-current transition-all duration-300 ${
+              isOpen ? "rotate-45" : "-translate-y-[4px]"
             }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            {isOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 6L18 18M6 18L18 6"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
+          />
+          <span
+            className={`absolute h-[1.5px] w-5 rounded-full bg-current transition-all duration-300 ${
+              isOpen ? "-rotate-45" : "translate-y-[4px]"
+            }`}
+          />
         </button>
-      </div>
+      </nav>
 
-      {/* Mobile Menu */}
-      <div
-        className={`md:hidden overflow-hidden border-t border-slate-200 bg-white transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-64 opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"
-        }`}
-      >
-        <div className="px-4 py-4 flex flex-col gap-4">
-          <a
-            href="#about-me"
-            className="text-[#50311D] hover:text-[#805C3B] transition-colors"
-            onClick={closeMenu}
-          >
-            Sobre Mim
-          </a>
-          <a
-            href="#footer"
-            className="text-[#50311D] hover:text-[#805C3B] transition-colors"
-            onClick={closeMenu}
-          >
-            Contactos
-          </a>
-          <a
-            href="https://docs.google.com/forms/d/1gelG6bb5q5cFLBGHRkJlcydtJFheVEpfUz_m81ljJjg/edit"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[#50311D] text-white px-4 py-2 rounded-md hover:bg-[#805C3B] transition"
-            onClick={closeMenu}
-          >
-            Agende uma sessão
-          </a>
-        </div>
-      </div>
-    </nav>
+      {/* Mobile menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              aria-hidden="true"
+              className="fixed inset-x-0 bottom-0 top-20 -z-10 bg-espresso/25 lg:hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              className="absolute inset-x-0 top-full border-b border-sand/60 bg-white lg:hidden"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.4, ease }}
+            >
+              <ul className="px-5 pt-2">
+                {NAV_LINKS.map((link) => (
+                  <li key={link.id} className="border-b border-sand/50">
+                    <a
+                      href={`#${link.id}`}
+                      onClick={goTo(link.id)}
+                      className={`block py-4 text-xl font-semibold ${
+                        active === link.id ? "text-espresso" : "text-mocha"
+                      }`}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <div className="px-5 pb-6 pt-5">
+                <a
+                  href={BOOKING_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setIsOpen(false)}
+                  className="button-primary w-full py-4"
+                >
+                  <CalendarHeart className="h-4 w-4" strokeWidth={1.75} />
+                  Agende uma sessão
+                </a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }
 

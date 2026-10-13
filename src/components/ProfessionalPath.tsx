@@ -1,32 +1,43 @@
 import { motion } from "framer-motion";
+import {
+  BadgeCheck,
+  BookOpenText,
+  GraduationCap,
+  HandHeart,
+  HeartHandshake,
+  Users,
+} from "lucide-react";
+import { ArcRing, Divider } from "./Ornaments";
 
 const steps = [
-  "Mestre em Psicologia Clínica – ISPA",
-  "Membro Efetivo da Ordem dos Psicólogos Portugueses (29795)",
-  "Curso Avançado em Parentalidade e Educação Consciente (CRIAP)",
-  "Experiência com Crianças, Adolescentes e Adultos",
-  "Experiência em Aconselhamento Psicológico Parental",
-  "Especialização em Terapia Familiar e de Casal",
+  { text: "Mestre em Psicologia Clínica – ISPA", icon: GraduationCap },
+  { text: "Membro Efetivo da Ordem dos Psicólogos Portugueses (29795)", icon: BadgeCheck },
+  { text: "Curso Avançado em Parentalidade e Educação Consciente (CRIAP)", icon: BookOpenText },
+  { text: "Experiência com Crianças, Adolescentes e Adultos", icon: Users },
+  { text: "Experiência em Aconselhamento Psicológico Parental", icon: HandHeart },
+  { text: "Especialização em Terapia Familiar e de Casal", icon: HeartHandshake },
 ];
+
+const ease = [0.22, 1, 0.36, 1] as const;
 
 const container = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.2,
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
     },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 24, scale: 0.96 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.7,
-      ease: [0.22, 1, 0.36, 1] as const,
+      duration: 0.8,
+      ease,
     },
   },
 };
@@ -37,79 +48,100 @@ const titleAnimation = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.8,
-      ease: [0.22, 1, 0.36, 1] as const,
+      duration: 0.9,
+      ease,
     },
   },
 };
 
+const iconBubble =
+  "relative z-10 flex items-center justify-center rounded-full border border-sand bg-white text-espresso shadow-[0_14px_30px_-14px_rgba(80,49,29,0.5)] transition-all duration-500 group-hover:-translate-y-1 group-hover:border-espresso group-hover:bg-espresso group-hover:text-sand";
+
 function ProfessionalPath() {
   return (
-    <section className="bg-white py-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <motion.h2
-          className="text-4xl font-bold text-center text-[#5C4033] mb-16"
+    <section id="percurso" className="relative isolate overflow-hidden bg-white py-24 md:py-32">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-linear-to-b from-transparent to-linen/40"
+      />
+      <ArcRing className="absolute -left-48 -top-56 -z-10 h-[30rem] w-[30rem] text-sand" />
+
+      <div className="mx-auto max-w-7xl px-6">
+        <motion.div
+          className="mb-16 text-center md:mb-24"
           variants={titleAnimation}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.7 }}
         >
-          Percurso Profissional
-        </motion.h2>
+          <h2 className="font-heading text-4xl font-bold text-cocoa md:text-5xl">
+            Percurso Profissional
+          </h2>
+          <Divider className="mt-6" />
+        </motion.div>
 
         {/* Mobile */}
-        <motion.div
-          className="flex flex-col lg:hidden"
+        <motion.ol
+          className="mx-auto flex max-w-xl flex-col lg:hidden"
           variants={container}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: true, amount: 0.15 }}
         >
-          {steps.map((step, index) => (
-            <motion.div
+          {steps.map(({ text, icon: Icon }, index) => (
+            <motion.li
               key={index}
-              className="grid grid-cols-[32px_1fr] gap-4"
+              className="group grid grid-cols-[56px_1fr] gap-5"
               variants={item}
             >
               <div className="flex flex-col items-center">
-                <div className="mt-1 w-4 h-4 rounded-full bg-[#7A5C48] ring-4 ring-[#EFE3D8]" />
+                <div className={`${iconBubble} h-14 w-14`}>
+                  <Icon className="h-5 w-5" strokeWidth={1.5} />
+                </div>
                 {index !== steps.length - 1 && (
-                  <div className="w-[2px] flex-1 min-h-[64px] bg-[#D4CABC] mt-2" />
+                  <div className="my-2 w-px flex-1 bg-linear-to-b from-sand to-sand/30" />
                 )}
               </div>
 
-              <div className="pb-8">
-                <p className="text-[#7A5C48] text-base leading-relaxed">
-                  {step}
-                </p>
+              <div className="pb-10 pt-4">
+                <p className="text-base leading-relaxed text-mocha">{text}</p>
               </div>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ol>
 
         {/* Desktop */}
-        <motion.div
-          className="hidden lg:grid lg:grid-cols-6 gap-6 relative"
+        <motion.ol
+          className="relative hidden gap-6 lg:grid lg:grid-cols-6"
           variants={container}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.25 }}
+          viewport={{ once: true, amount: 0.3 }}
         >
-          <div className="absolute top-2 left-[8%] right-[8%] h-[2px] bg-[#D4CABC] z-0" />
+          <motion.div
+            aria-hidden="true"
+            className="absolute left-[8.33%] right-[8.33%] top-8 h-px origin-left bg-linear-to-r from-sand via-caramel/50 to-sand"
+            variants={{
+              hidden: { scaleX: 0 },
+              visible: { scaleX: 1, transition: { duration: 1.6, ease } },
+            }}
+          />
 
-          {steps.map((step, index) => (
-            <motion.div
+          {steps.map(({ text, icon: Icon }, index) => (
+            <motion.li
               key={index}
-              className="relative z-10 flex flex-col items-center text-center"
+              className="group relative flex flex-col items-center text-center"
               variants={item}
             >
-              <div className="w-4 h-4 rounded-full bg-[#7A5C48] ring-4 ring-[#EFE3D8] mb-5 shadow-sm" />
-              <p className="text-[#7A5C48] text-sm xl:text-base leading-relaxed max-w-[220px] mx-auto">
-                {step}
+              <div className={`${iconBubble} mb-6 h-16 w-16`}>
+                <Icon className="h-6 w-6" strokeWidth={1.5} />
+              </div>
+              <p className="mx-auto max-w-[210px] text-sm leading-relaxed text-mocha xl:text-[0.95rem]">
+                {text}
               </p>
-            </motion.div>
+            </motion.li>
           ))}
-        </motion.div>
+        </motion.ol>
       </div>
     </section>
   );

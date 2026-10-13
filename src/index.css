@@ -1,54 +1,76 @@
-/* ====================== TAILWIND + DAISYUI (Modern v4/v5 way) ====================== */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* ====================== FONTS + TAILWIND + DAISYUI ====================== */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap');
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: light --default;
+}
 
-/* ====================== GOOGLE FONTS ====================== */
-
-
-/* ====================== CUSTOM STYLES ====================== */
+/* ====================== DESIGN TOKENS ====================== */
 @theme {
   --font-sans: 'Montserrat', system-ui, sans-serif;
+  /* Headings use the original site's font. Swap for a serif here to restyle every title at once. */
+  --font-heading: 'Montserrat', system-ui, sans-serif;
+
+  --color-espresso: #50311D;
+  --color-cocoa: #5C4033;
+  --color-mocha: #7A5C48;
+  --color-caramel: #805C3B;
+  --color-sand: #D4CABC;
+  --color-linen: #EFE3D8;
+}
+
+/* ====================== BASE ====================== */
+/* Smooth scrolling is handled by Lenis (see src/lib/smoothScroll.ts) */
+html {
+  scroll-padding-top: 5rem;
 }
 
 body {
   font-family: var(--font-sans);
-}
-html {
-  scroll-behavior: smooth;
-}
-
-.hero {
-  background-size: cover;
-  background-position: center;
-  min-height: 100vh;
-  position: relative;
+  background-color: #fff;
+  color: var(--color-mocha);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Your existing custom styles (steps, forms, buttons, cards, scrollbar, etc.) */
-
-input, textarea {
-  transition: all 0.2s ease;
+::selection {
+  background-color: var(--color-sand);
+  color: var(--color-espresso);
 }
 
-input:focus, textarea:focus {
-  border-color: #50311D;
-  box-shadow: 0 0 0 3px rgba(80, 49, 29, 0.15);
-  outline: none;
+/* ====================== COMPONENTS ====================== */
+@layer components {
+  .button-primary {
+    @apply relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full bg-espresso px-7 py-3.5 text-sm font-semibold tracking-wide text-sand shadow-[0_12px_30px_-12px_rgba(80,49,29,0.6)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-mocha hover:text-white hover:shadow-[0_20px_40px_-14px_rgba(80,49,29,0.65)] disabled:pointer-events-none disabled:opacity-70;
+  }
+
+  .button-light {
+    @apply relative inline-flex items-center justify-center gap-2.5 rounded-full bg-white px-7 py-3.5 text-sm font-semibold tracking-wide text-espresso transition-all duration-300 hover:-translate-y-0.5 hover:bg-linen;
+  }
+
+  /* Soft light sweep across primary buttons on hover */
+  .button-primary::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.22) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.9s ease;
+    pointer-events: none;
+  }
+
+  .button-primary:hover::after {
+    transform: translateX(120%);
+  }
+
+  /* Arch-shaped frame (expects a 3:4 box) */
+  .arch-frame {
+    border-radius: 50% 50% 1.75rem 1.75rem / 37.5% 37.5% 1.75rem 1.75rem;
+  }
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(80, 49, 29, 0.3);
-}
-
-.card-hover:hover {
-  transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 25px 50px -12px rgb(80 49 29 / 0.25);
-}
-
-/* Add any other custom rules you had before */
-
+/* ====================== ANIMATIONS ====================== */
 @keyframes float {
   0% {
     transform: translateY(0px);
@@ -62,44 +84,29 @@ input:focus, textarea:focus {
 }
 
 .float-arrow {
-  animation: float 2s ease-in-out infinite;
+  animation: float 2.4s ease-in-out infinite;
 }
 
-
-@keyframes fadeUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
+/* The logo arc "breathes": a slow 8s inhale / exhale */
+@keyframes breathe {
+  0%,
   100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-up {
-  animation: fadeUp 1s ease-out forwards;
-}
-
-
-/* STEPS */
-
-
-
-
-/* FLOATING RECTANGLES */
-@keyframes floatSoft {
-  0% {
-    transform: translateY(0px);
+    transform: scale(1);
+    opacity: 0.55;
   }
   50% {
-    transform: translateY(8px);
-  }
-  100% {
-    transform: translateY(0px);
+    transform: scale(1.045);
+    opacity: 1;
   }
 }
 
-.float-soft {
-  animation: floatSoft 4s ease-in-out infinite;
+.breathe {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-arrow,
+  .breathe {
+    animation: none;
+  }
 }
