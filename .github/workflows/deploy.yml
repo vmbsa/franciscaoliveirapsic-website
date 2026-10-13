@@ -31,15 +31,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
       - name: Build
         run: npm run build
         env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
           VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
           VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
           VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+      # Pages has no SPA routing: serve the app for direct links like /politica-de-privacidade
+      - name: SPA fallback
+        run: cp dist/index.html dist/404.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

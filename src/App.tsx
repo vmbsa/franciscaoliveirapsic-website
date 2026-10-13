@@ -5,7 +5,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
