@@ -1,5 +1,5 @@
 export const BOOKING_URL =
-  "https://docs.google.com/forms/d/1gelG6bb5q5cFLBGHRkJlcydtJFheVEpfUz_m81ljJjg/edit";
+  "https://docs.google.com/forms/d/e/1FAIpQLSe8GrhD0mcpmx33jaVVc2VWqcqMxDaVuiTaLRwTi8bxC6qMGA/viewform";
 
 /* In page order. */
 export const NAV_LINKS = [
